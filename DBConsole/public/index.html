@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DB Console</title>
+  <link rel="stylesheet" href="/monaco/editor/editor.main.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="shell" class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-topbar">
+        <div class="brand">
+          <div class="brand-mark">DB</div>
+          <div class="sidebar-brand-text"><h1>DB Console</h1></div>
+        </div>
+      </div>
+      <section class="panel">
+        <div class="panel-header">
+          <h2>连接</h2>
+          <div class="action-row"><button id="newConnectionBtn" class="primary-btn">新建</button></div>
+        </div>
+        <div id="connectionList" class="connection-list"></div>
+        <div id="connectionContextMenu" class="context-menu hidden">
+          <button id="editConnectionBtn" class="context-menu-item">编辑连接</button>
+          <button id="deleteConnectionBtn" class="context-menu-item context-menu-danger">删除连接</button>
+        </div>
+      </section>
+    </aside>
+    <button id="toggleSidebarBtn" class="ghost-btn sidebar-handle" title="收起左侧栏" aria-label="收起左侧栏">&lt;</button>
+    <main class="main">
+      <section class="workspace-top">
+        <div>
+          <p class="eyebrow">当前连接</p>
+          <h2 id="activeConnectionName">未选择连接</h2>
+        </div>
+        <div id="statusBar" class="status-bar">准备就绪</div>
+      </section>
+      <section class="workspace-grid">
+        <section class="panel schema-panel">
+          <div class="panel-header"><h2>结构浏览</h2></div>
+          <div class="schema-search-row"><input id="schemaSearchInput" type="search" placeholder="搜索 schema 或表名"></div>
+          <div id="schemaTree" class="schema-tree"></div>
+          <div id="databaseContextMenu" class="context-menu hidden">
+            <button id="openDatabaseBtn" class="context-menu-item">打开数据库</button>
+            <button id="closeDatabaseBtn" class="context-menu-item">关闭数据库</button>
+            <button id="editDatabaseBtn" class="context-menu-item">编辑数据库</button>
+            <button id="createDatabaseBtn" class="context-menu-item">新建数据库</button>
+            <button id="deleteDatabaseBtn" class="context-menu-item context-menu-danger">删除数据库</button>
+            <button id="refreshDatabaseBtn" class="context-menu-item">刷新</button>
+          </div>
+          <div id="tableContextMenu" class="context-menu hidden">
+            <button id="openTableMenuBtn" class="context-menu-item">打开表</button>
+            <button id="designTableBtn" class="context-menu-item">设计表</button>
+            <button id="createTableBtn" class="context-menu-item">新建表</button>
+            <button id="deleteTableBtn" class="context-menu-item context-menu-danger">删除表</button>
+            <button id="clearTableBtn" class="context-menu-item">清空表</button>
+            <button id="truncateTableBtn" class="context-menu-item">截断表</button>
+            <button id="importWizardBtn" class="context-menu-item">导入向导</button>
+            <button id="exportWizardBtn" class="context-menu-item">导出向导</button>
+            <button id="renameTableBtn" class="context-menu-item">重命名</button>
+            <button id="refreshTableSchemaBtn" class="context-menu-item">刷新</button>
+          </div>
+          <div id="tableGroupContextMenu" class="context-menu hidden">
+            <button id="createTableFromGroupBtn" class="context-menu-item">新建表</button>
+            <button id="importTableGroupBtn" class="context-menu-item">导入向导</button>
+            <button id="refreshTableGroupBtn" class="context-menu-item">刷新</button>
+          </div>
+        </section>
+        <div id="workspaceResizeHandle" class="workspace-resize-handle" title="拖拽调整宽度"></div>
+        <section class="panel content-panel">
+          <div class="tab-panel" id="queryTab">
+            <div class="query-tabbar"><div id="queryTabs" class="query-tabs"></div><button id="newQueryTabBtn" class="text-action-btn">新建查询</button></div>
+            <div class="editor-toolbar">
+              <div class="editor-meta">
+                <label class="editor-select-group"><span>连接</span><select id="queryConnectionSelect"></select></label>
+                <label class="editor-select-group"><span>数据库</span><select id="queryDatabaseSelect"></select></label>
+                <span id="editorDialectBadge" class="dialect-badge">SQL</span>
+              </div>
+              <div id="queryEditorActions" class="action-row">
+                <span id="queryRunActions" class="hidden"></span>
+                <button id="runQueryBtn" class="text-action-btn"><span class="btn-icon btn-icon-run" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="m5 3.5 6 4.5-6 4.5Z"></path></svg></span><span>运行</span></button>
+                <button id="stopQueryBtn" class="text-action-btn" disabled><span class="btn-icon btn-icon-stop" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><rect x="4.5" y="4.5" width="7" height="7" rx="1"></rect></svg></span><span>停止</span></button>
+                <button id="formatSqlBtn" class="text-action-btn"><span class="btn-icon btn-icon-format" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M3 4h10"></path><path d="M3 8h7"></path><path d="M3 12h9"></path><path d="M11 6.5 13 8l-2 1.5"></path></svg></span><span>美化 SQL</span></button>
+                <button id="openSqlHistoryBtn" class="text-action-btn"><span class="btn-icon btn-icon-history" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M8 3.5a4.5 4.5 0 1 1-4.2 2.9"></path><path d="M3.5 3.5v3h3"></path><path d="M8 5.5v3l2 1.2"></path></svg></span><span>历史</span></button>
+              </div>
+            </div>
+            <div class="sql-editor-shell"><div id="sqlEditor" class="sql-editor"></div><div id="sqlSuggestPanel" class="sql-suggest-panel hidden"></div></div>
+            <div id="queryResultWrap" class="query-result-wrap hidden"><div id="queryResultResizeHandle" class="query-result-resize" title="向上拖动增大结果区"></div><div id="queryResult" class="result-panel query-result-panel"></div></div>
+            <div id="queryCellContextMenu" class="context-menu hidden"><button id="copyQueryCellBtn" class="context-menu-item">复制单元格内容</button></div>
+          </div>
+          <div class="tab-panel active" id="dataTab">
+            <div id="dataToolbar" class="toolbar"><div class="action-row">
+              <button id="openQueryFromDataBtn" class="text-action-btn"><span class="btn-icon btn-icon-query" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M5 2.5h4.8L13 5.7v7.8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z"></path><path d="M9.8 2.5v3.2H13"></path><path d="M8 7v4"></path><path d="M6 9h4"></path></svg></span><span>新建查询</span></button>
+              <button id="toggleFilterBtn" class="text-action-btn table-only-action"><span class="btn-icon btn-icon-filter" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M2.5 3.5h11l-4.2 4.8v3.3l-2.6 1V8.3L2.5 3.5Z"></path></svg></span><span>筛选</span></button>
+              <button id="openExportModalBtn" class="text-action-btn table-only-action"><span class="btn-icon btn-icon-export" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M8 10.8V3.2"></path><path d="m5.4 5.8 2.6-2.6 2.6 2.6"></path><path d="M3 10.5v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"></path></svg></span><span>导出</span></button>
+              <button id="openImportModalBtn" class="text-action-btn table-only-action"><span class="btn-icon btn-icon-import" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M8 3.2v7.6"></path><path d="m5.4 8.2 2.6 2.6 2.6-2.6"></path><path d="M3 10.5v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"></path></svg></span><span>导入</span></button>
+            </div></div>
+            <div id="dataFilterRow" class="filter-row hidden"><select id="filterColumnSelect"><option value="">选择字段</option></select><select id="filterOperatorSelect"><option value="contains">包含</option><option value="equals">等于</option><option value="startsWith">开头是</option><option value="endsWith">结尾是</option><option value="isNull">为空</option><option value="isNotNull">非空</option></select><input id="filterValueInput" type="text" placeholder="筛选值"><button id="applyFilterBtn" class="ghost-btn">应用筛选</button><button id="clearFilterBtn" class="ghost-btn">清空筛选</button></div>
+            <div class="table-meta"><span id="activeTableName">未选择表</span><span id="primaryKeyHint"></span></div>
+            <div id="dataTableWrap" class="result-panel"></div>
+            <div id="dataActions" class="data-actions hidden data-actions-inline-start"><div class="action-row data-actions-left"><button id="insertRowBtn" class="add-row-btn" title="新增行">+</button><button id="refreshTableBtn" class="icon-action-btn" title="刷新">↻</button></div><div class="data-actions-right"><div id="tablePagination" class="table-pagination"></div><label class="limit-control"><span>每页条数</span><input id="tableLimitInput" type="number" min="1" max="5000" step="100" value="1000"></label></div></div>
+            <div id="editActions" class="edit-actions hidden"><button id="saveEditBtn" class="icon-action-btn icon-confirm-btn" title="保存">✓</button><button id="cancelEditBtn" class="icon-action-btn icon-cancel-btn" title="取消">×</button></div>
+            <div id="rowContextMenu" class="context-menu hidden"><button id="designTableFromRowBtn" class="context-menu-item">设计表</button><button id="showInsertSqlBtn" class="context-menu-item">查看 INSERT SQL</button><button id="deleteRowBtn" class="context-menu-item context-menu-danger">删除此行</button></div>
+          </div>
+          <div class="tab-panel" id="structureTab"><div id="structureToolbar" class="toolbar hidden"><div class="action-row"><button id="addColumnBtn" class="text-action-btn"><span class="btn-icon btn-icon-column" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path d="M3.5 3.5h9v9h-9Z"></path><path d="M8 3.5v9"></path><path d="M3.5 8h9"></path><path d="M12.5 3.5v3"></path><path d="M11 5h3"></path></svg></span><span>新增字段</span></button></div></div><div id="columnList" class="result-panel"></div></div>
+          <aside id="tableInspector" class="table-inspector" aria-hidden="true"><div class="table-inspector-header"><button id="toggleTableInspectorBtn" type="button" class="ghost-btn table-inspector-toggle-btn" aria-label="收起模块面板" title="收起模块面板">&lt;</button><div><h3 id="tableInspectorTitle">表信息</h3><div id="tableInspectorSubtitle" class="table-inspector-subtitle"></div></div></div><div id="tableInspectorTabs" class="table-inspector-tabs"><button type="button" class="table-inspector-tab active" data-tab="info">表信息</button><button type="button" class="table-inspector-tab" data-tab="ddl">DDL</button><button type="button" class="table-inspector-tab" data-tab="column">字段信息</button></div><div id="tableInspectorBody" class="table-inspector-body"></div></aside>
+          <aside id="sqlHistoryModal" class="sql-history-card" aria-hidden="true"><div class="sql-history-card-header"><button id="closeSqlHistoryBtn" type="button" class="ghost-btn table-inspector-toggle-btn" title="关闭 SQL 历史">×</button><div><h3>SQL 历史</h3><div class="table-inspector-subtitle">最近成功执行的查询</div></div></div><div class="sql-history-card-actions"><button id="clearSqlHistoryBtn" class="ghost-btn">清空历史</button></div><div id="sqlHistoryList" class="sql-history-list"></div></aside>
+        </section>
+      </section>
+    </main>
+  </div>
+  <div id="designTableModal" class="modal-overlay hidden"><div class="modal-card design-table-modal-card"><button id="closeDesignTableModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="designTableModalTitle">设计表</h2></div><div id="designTableToolbar" class="toolbar hidden"><div class="action-row"><button id="addColumnFromDesignBtn" class="text-action-btn">新增字段</button></div></div><div id="designTableColumnList" class="result-panel"></div></div></div>
+  <div id="sqlPreviewModal" class="modal-overlay hidden"><button id="closeSqlPreviewBtn" class="ghost-btn modal-overlay-close-btn">关闭</button><div class="modal-card"><div class="panel-header"><h2>INSERT SQL</h2></div><pre id="insertSqlPreview" class="sql-preview"></pre><div class="action-row"><button id="copyInsertSqlBtn" class="primary-btn">复制 SQL</button></div></div></div>
+  <div id="connectionModal" class="modal-overlay hidden"><div class="modal-card connection-modal-card"><button id="closeConnectionModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="connectionModalTitle">新建连接</h2></div><form id="connectionForm" class="stack-form"><input type="hidden" name="id"><label><span>名称</span><input name="name" required></label><label><span>类型</span><select name="type"><option value="mysql">MySQL</option><option value="postgres">PostgreSQL</option><option value="selectdb">SelectDB</option><option value="mongodb">MongoDB</option></select></label><label><span>主机</span><input name="host" value="127.0.0.1" required></label><label><span>端口</span><input name="port" required></label><label><span>数据库</span><input name="database"></label><label><span>用户名</span><input name="username" required></label><label><span>密码</span><input name="password" type="password"></label><div class="action-row"><button type="button" id="testConnectionBtn" class="ghost-btn">测试连接</button><button type="submit" class="primary-btn">保存连接</button></div></form></div></div>
+  <div id="connectionTestModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeConnectionTestModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2>连接测试结果</h2></div><div id="connectionTestResult" class="message"></div></div></div>
+  <div id="tableActionModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeTableActionModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="tableActionModalTitle">导出</h2></div><div id="exportActionPanel" class="stack-form hidden"><span>导出格式</span><label class="radio-option"><input type="radio" name="exportFormat" value="csv" checked><span>CSV</span></label><label class="radio-option"><input type="radio" name="exportFormat" value="xlsx"><span>Excel</span></label><div class="action-row"><button id="confirmExportBtn" class="primary-btn">开始导出</button></div></div><form id="importForm" class="stack-form hidden"><span>导入格式</span><label class="radio-option"><input type="radio" name="importFormat" value="csv" checked><span>CSV</span></label><span>导入方式</span><label class="radio-option"><input type="radio" name="importMode" value="append" checked><span>追加</span></label><label class="radio-option"><input type="radio" name="importMode" value="replace"><span>覆盖</span></label><label><span>文件</span><input type="file" id="importFile" accept=".csv"></label><div class="action-row"><button type="submit" id="confirmImportBtn" class="primary-btn">开始导出</button></div></form></div></div>
+  <div id="columnModal" class="modal-overlay hidden"><div class="modal-card column-modal-card"><button id="closeColumnModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="columnModalTitle">新增字段</h2></div><form id="columnForm" class="column-designer-form"><input type="hidden" name="mode"><input type="hidden" name="originalName"><input type="hidden" name="columnType"><section class="column-designer-section"><div class="column-designer-grid"><label class="field-control field-control-wide"><span>字段名</span><input name="columnName" placeholder="例如 user_name" required></label><label class="field-control"><span>类型模板</span><select id="columnTypePreset" name="typePreset"><option value="varchar">短文本</option><option value="text">长文本</option><option value="integer">整数</option><option value="bigint">大整数</option><option value="decimal">小数</option><option value="boolean">布尔</option><option value="date">日期</option><option value="datetime">日期时间</option><option value="json">JSON</option><option value="custom">自定义</option></select></label><label class="field-control" data-column-type-option="length"><span>长度</span><input id="columnTypeLength" name="typeLength" type="number" min="1" max="65535" step="1" value="255"></label><label class="field-control" data-column-type-option="precision"><span>精度</span><input id="columnTypePrecision" name="typePrecision" type="number" min="1" max="65" step="1" value="18"></label><label class="field-control" data-column-type-option="scale"><span>小数位</span><input id="columnTypeScale" name="typeScale" type="number" min="0" max="30" step="1" value="4"></label><label class="field-control field-control-wide hidden" id="columnCustomTypeWrap"><span>自定义类型</span><input id="columnCustomType" name="customType" placeholder="例如 varchar(255) / numeric(18,4)"></label></div></section><section class="column-designer-section"><div class="column-option-row"><label class="switch-option"><input type="checkbox" name="allowNull" checked><span>允许为空</span></label><label class="switch-option" id="columnPrimaryKeyWrap"><input type="checkbox" id="columnPrimaryKey" name="primaryKey"><span>是否主键</span></label><label class="switch-option" id="columnAutoIncrementWrap"><input type="checkbox" id="columnAutoIncrement" name="autoIncrement"><span>是否自增（仅主键）</span></label><label class="field-control"><span>默认值</span><select id="columnDefaultMode" name="defaultMode"><option value="none">不设置</option><option value="null">NULL</option><option value="value">固定值</option><option value="expression">表达式</option></select></label><label class="field-control field-control-fill" id="columnDefaultValueWrap"><span id="columnDefaultValueLabel">默认值内容</span><input name="columnDefault" placeholder="例如 0 / active / CURRENT_TIMESTAMP"></label></div></section><section class="column-designer-section column-sql-preview"><span>字段定义预览</span><code id="columnDefinitionPreview"></code></section><div class="action-row column-designer-actions"><button type="button" class="ghost-btn" id="cancelColumnBtn">取消</button><button type="submit" class="primary-btn">保存字段</button></div></form></div></div>
+  <div id="databaseModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeDatabaseModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="databaseModalTitle">新建数据库</h2></div><form id="databaseForm" class="stack-form"><input type="hidden" name="mode"><input type="hidden" name="originalName"><label><span>数据库名</span><input name="databaseName" required></label><div class="action-row"><button type="submit" class="primary-btn">保存</button></div></form></div></div>
+  <div id="deleteDatabaseModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeDeleteDatabaseModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2>确认删除数据库</h2></div><div id="deleteDatabaseMessage" class="message"></div><div class="action-row"><button id="confirmDeleteDatabaseBtn" class="danger-btn">确认删除</button></div></div></div>
+  <div id="tableModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeTableModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="tableModalTitle">新建表</h2></div><form id="tableForm" class="stack-form"><input type="hidden" name="mode"><input type="hidden" name="originalName"><label><span>表名</span><input name="tableName" required></label><div class="action-row"><button type="submit" class="primary-btn">保存</button></div></form></div></div>
+  <div id="deleteTableModal" class="modal-overlay hidden"><div class="modal-card action-modal-card"><button id="closeDeleteTableModalBtn" class="ghost-btn modal-card-close-btn" title="关闭">×</button><div class="panel-header"><h2 id="deleteTableModalTitle">确认删除表</h2></div><div id="deleteTableMessage" class="message"></div><div class="action-row"><button id="confirmDeleteTableBtn" class="danger-btn">确认</button></div></div></div>
+  <script>window.MonacoEnvironment={getWorkerUrl:function(){return 'data:text/javascript;charset=utf-8,'+encodeURIComponent("self.MonacoEnvironment={baseUrl:'/monaco/'};importScripts('/monaco/base/worker/workerMain.js');");}};</script>
+  <script src="/monaco/loader.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
+
+
+
+
+

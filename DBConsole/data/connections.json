@@ -1,0 +1,14 @@
+[
+  {
+    "id": "conn_1776771863110",
+    "name": "localhost",
+    "type": "mysql",
+    "host": "127.0.0.1",
+    "port": "3306",
+    "database": "",
+    "username": "root",
+    "password": "enc:v1:b58478d88cb215c4ebeeb8ab:78abc70806907cfdc15b0f116ce40007:47d79a67dbbdd1a572097b",
+    "createdAt": "2026-04-21T11:44:23.110Z",
+    "updatedAt": "2026-04-21T11:44:23.110Z"
+  }
+]
