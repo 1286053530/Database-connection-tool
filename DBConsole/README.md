@@ -81,6 +81,20 @@ PORT=3001 npm start
 ### 设计表
 
 ![设计表](docs/images/table-designer.png)
+新增字段
+<img width="2864" height="1536" alt="100d44606e058e55917c8c7f4c3fe453" src="https://github.com/user-attachments/assets/2d1d9d89-1222-481b-90d1-a5878abef452" />
+表格选项
+<img width="2864" height="1536" alt="59ffec1c93d5e066434699e0dc0c7f30" src="https://github.com/user-attachments/assets/58791a4e-d72a-48d7-84d1-0835c9e6d3f6" />
+
+查询界面
+<img width="2880" height="1704" alt="7e6e962b1a14a765a5c46d66eec1b634" src="https://github.com/user-attachments/assets/3caf1d59-c7b1-463d-b8f7-bc7cd03efbcf" />
+表格界面
+<img width="2864" height="1536" alt="906b26411b9f45cef2eeca588b327131" src="https://github.com/user-attachments/assets/534bc4a4-5c0b-48d4-a7db-b31799b720ba" />
+右侧表结构信息
+<img width="2864" height="1536" alt="0e089afdd2173214056230179d7ec744" src="https://github.com/user-attachments/assets/ed739164-c808-4046-8c2c-cdce1d8d4c08" />
+整个页面布局
+![Uploading 2ddcc0e1658b5add5adcb096cfc91eb0.png…]()
+
 
 ## 常见问题
 
